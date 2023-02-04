@@ -2,3 +2,4 @@ black
 pylint
 debugpy
 ipdb
+ruff-lsp

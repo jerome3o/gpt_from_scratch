@@ -1,8 +1,14 @@
-import tiktoken
 import torch
+from torch import nn
 
+# hyperparameters
 _block_size = 8
 _batch_size = 4
+max_iters = 3000
+learning_rate = 1e-2
+device = "cuda" if torch.cuda.is_available() else "cpu"
+eval_interval = 300
+eval_iters = 200
 
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
@@ -17,6 +23,10 @@ def load_training(f: str = "input.txt") -> str:
         return f.read()
 
 
+class BigramLanguageModel(torch.nn.Module):
+    def __init__(self, vocab_size: int):
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+
 def main():
     raw_training_data = load_training()
 
@@ -28,6 +38,8 @@ def main():
     # Character level tokeniser
     chars = sorted(set(raw_training_data))
     vocab_size = len(chars)
+
+    # create mapping from string to int and vice versa
     s_to_i = {s: i for i, s in enumerate(chars)}
     i_to_s = {i: s for i, s in enumerate(chars)}
     encode = lambda x: [s_to_i[c] for c in x]
@@ -38,24 +50,13 @@ def main():
     # encode = enc.encode
     # decode = enc.decode
 
+    # encode the training data
     data = torch.tensor(encode(raw_training_data), dtype=torch.long)
 
+    # get train and validation splits
     _n = int(len(data) * 0.9)
     train_data = data[:_n]
     val_data = data[_n:]
-
-    xb, yb = get_batch(train_data)
-    print(xb.shape, yb.shape)
-    print(xb)
-    print(yb)
-
-    for batch_i in range(_batch_size):
-        for block_i in range(_block_size):
-            context = xb[batch_i, : block_i + 1]
-            target = yb[batch_i, block_i]
-            print(
-                f"when the context is {decode(context.tolist())}, the target is {decode([target.tolist()])}"
-            )
 
 
 if __name__ == "__main__":
