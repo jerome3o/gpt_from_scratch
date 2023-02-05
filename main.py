@@ -3,8 +3,8 @@ from torch import nn
 from torch.nn import functional as F
 
 # hyperparameters
-_BLOCK_SIZE = 8
-_BATCH_SIZE = 4
+BLOCK_SIZE = 8
+BATCH_SIZE = 4
 MAX_ITERS = 3000
 LEARNING_RATE = 1e-2
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -13,9 +13,9 @@ EVAL_ITERS = 200
 
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
-    ix = torch.randint(len(data) - _BLOCK_SIZE, (_BATCH_SIZE,))
-    x = torch.stack([data[i : i + _BLOCK_SIZE] for i in ix])
-    y = torch.stack([data[i + 1 : i + _BLOCK_SIZE + 1] for i in ix])
+    ix = torch.randint(len(data) - BLOCK_SIZE, (BATCH_SIZE,))
+    x = torch.stack([data[i : i + BLOCK_SIZE] for i in ix])
+    y = torch.stack([data[i + 1 : i + BLOCK_SIZE + 1] for i in ix])
     return x.to(DEVICE), y.to(DEVICE)
 
 
