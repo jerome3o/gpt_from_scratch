@@ -136,17 +136,8 @@ def main():
 
         # get accurate loss prediction
         if iter % EVAL_INTERVAL == 0:
-            # get the validation loss
-            x, y = get_batch(val_data).to(DEVICE)
-            x = x.to(DEVICE)
-            y = y.to(DEVICE)
-            _, val_loss = model(x, y)
-
-            # get the training loss
-            x, y = get_batch(train_data).to(DEVICE)
-            _, train_loss = model(x, y)
-
-            print(f"iter {iter}: train loss = {train_loss:.3f}, val loss = {val_loss:.3f}")
+            losses = estimate_loss(model, train_data, val_data)
+            print(f"iter: {iter}\n" f"\ttrain {losses['train']:.3f}\n" f"\tval {losses['val']:.3f}")
 
     # generate from the model
     context = torch.zeros((1, 1), dtype=torch.long).to(DEVICE)
