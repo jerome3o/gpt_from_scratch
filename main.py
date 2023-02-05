@@ -24,6 +24,25 @@ def load_training(f: str = "input.txt") -> str:
         return f.read()
 
 
+@torch.no_grad()
+def estimate_loss(
+    model: torch.nn.Module,
+    train_data: torch.Tensor,
+    val_data: torch.Tensor,
+) -> torch.Tensor:
+    out = {}
+    model.eval()
+    for name, data in [("train", train_data), ("val", val_data)]:
+        losses = torch.zeros(EVAL_ITERS)
+        for k in range(EVAL_ITERS):
+            x, y = get_batch(data)
+            _, loss = model(x, y)
+            losses[k] = loss.item()
+        out[name] = losses.mean()
+    model.train()
+    return out
+
+
 class BigramLanguageModel(torch.nn.Module):
     def __init__(self, vocab_size: int):
         super().__init__()
@@ -128,6 +147,10 @@ def main():
             _, train_loss = model(x, y)
 
             print(f"iter {iter}: train loss = {train_loss:.3f}, val loss = {val_loss:.3f}")
+
+    # generate from the model
+    context = torch.zeros((1, 1), dtype=torch.long).to(DEVICE)
+    print(decode(model.generate(context, 1000).cpu().numpy()[0]))
 
 
 if __name__ == "__main__":
