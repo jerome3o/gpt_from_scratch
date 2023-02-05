@@ -54,7 +54,7 @@ class BigramLanguageModel(torch.nn.Module):
         logits = self.token_embedding_table(idx)  # (B, T, C)
 
         if targets is None:
-            loss = Non
+            loss = None
         else:
             B, T, C = logits.shape
             # logits = logits.reshape(-1, C)  # (B*T, C)
@@ -137,7 +137,7 @@ def main():
         # get accurate loss prediction
         if iter % EVAL_INTERVAL == 0:
             losses = estimate_loss(model, train_data, val_data)
-            print(f"iter: {iter}\n" f"\ttrain {losses['train']:.3f}\n" f"\tval {losses['val']:.3f}")
+            print(f"iter: {iter} train {losses['train']:.3f} val {losses['val']:.3f}")
 
     # generate from the model
     context = torch.zeros((1, 1), dtype=torch.long).to(DEVICE)
