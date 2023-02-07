@@ -72,13 +72,24 @@ class Head(nn.Module):
         return out
 
 
+class MultiHead(nn.Module):
+    """ A multi-head attention layer. """
+    def __init__(self, n_heads: int, head_size: int):
+        super().__init__()
+        self.heads = nn.ModuleList([Head(head_size) for _ in range(n_heads)])
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # return concat of all heads
+        return torch.cat([h(x) for h in self.heads], dim=-1)
+
+
 class BigramLanguageModel(torch.nn.Module):
     def __init__(self, vocab_size: int):
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, N_EMBED)
         self.position_embedding_table = nn.Embedding(BLOCK_SIZE, N_EMBED)
         self.lm_head = nn.Linear(N_EMBED, vocab_size)
-        self.sa_head = Head(N_EMBED)
+        self.sa_heads = MultiHead(n_heads=4, head_size=N_EMBED // 4)
 
     def forward(
         self,
@@ -93,7 +104,7 @@ class BigramLanguageModel(torch.nn.Module):
             torch.arange(T, device=DEVICE)
         )  # (T, C)
         x = token_embeddings + position_embeddings  # (B, T, C)
-        x = self.sa_head(x) # (B, T, C)
+        x = self.sa_heads(x) # (B, T, C)
 
         # get the logits
         logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
