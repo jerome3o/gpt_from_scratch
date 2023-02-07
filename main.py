@@ -99,6 +99,21 @@ class MultiHead(nn.Module):
         return torch.cat([h(x) for h in self.heads], dim=-1)
 
 
+class Block(nn.Module):
+    """ Transformer block: communication followed by computation """
+
+    def __init__(self, n_embd: int, n_head: int):
+        super().__init__()
+        head_size = n_embd // n_head
+        self.sa_heads = MultiHead(n_head, head_size)
+        self.ff = FeedForward(n_embd)
+
+    def forward(self, x):
+        x = self.sa(x)
+        x = self.ff(x)
+        return x
+
+
 class Transformer(torch.nn.Module):
     def __init__(self, vocab_size: int):
         super().__init__()
