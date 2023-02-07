@@ -167,6 +167,7 @@ class BigramLanguageModel(torch.nn.Module):
 
 def main():
     raw_training_data = load_training()
+    torch.manual_seed(1337)
 
     # TODO(j.swannack): Look into other encoding schemes
     # i.e.
