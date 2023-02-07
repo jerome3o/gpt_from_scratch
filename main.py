@@ -6,14 +6,14 @@ from torch.nn import functional as F
 BATCH_SIZE = 64
 BLOCK_SIZE = 256
 MAX_ITERS = 5000
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 3e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EVAL_INTERVAL = 300
 EVAL_ITERS = 200
-N_EMBED = 32
-N_HEAD = 4
-N_LAYERS = 3
-DROP_RATE = 0.1
+N_EMBED = 384
+N_HEAD = 6
+N_LAYERS = 6
+DROP_RATE = 0.2
 
 print(DEVICE)
 
