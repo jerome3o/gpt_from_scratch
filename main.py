@@ -10,6 +10,7 @@ LEARNING_RATE = 1e-2
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EVAL_INTERVAL = 300
 EVAL_ITERS = 200
+N_EMBED = 32
 
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
@@ -46,12 +47,20 @@ def estimate_loss(
 class BigramLanguageModel(torch.nn.Module):
     def __init__(self, vocab_size: int):
         super().__init__()
-        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, N_EMBED)
+        self.lm_head = nn.Linear(N_EMBED, vocab_size)
 
-    def forward(self, idx: torch.Tensor, targets: torch.Tensor = None) -> torch.Tensor:
+    def forward(
+        self,
+        idx: torch.Tensor,
+        targets: torch.Tensor = None,
+    ) -> torch.Tensor:
 
         # idx and targets are both (B, T) tensors of integers
-        logits = self.token_embedding_table(idx)  # (B, T, C)
+        token_embeddings = self.token_embedding_table(idx)  # (B, T, C)
+
+        # get the logits
+        logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
 
         if targets is None:
             loss = None
