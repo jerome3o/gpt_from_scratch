@@ -5,8 +5,8 @@ from torch.nn import functional as F
 # hyperparameters
 BLOCK_SIZE = 8
 BATCH_SIZE = 4
-MAX_ITERS = 3000
-LEARNING_RATE = 1e-2
+MAX_ITERS = 5000
+LEARNING_RATE = 1e-3
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EVAL_INTERVAL = 300
 EVAL_ITERS = 200
@@ -45,7 +45,7 @@ def estimate_loss(
 
 
 class Head(nn.Module):
-    def __init__(self, head_size):
+    def __init__(self, head_size, max_block_size=BLOCK_SIZE):
         super().__init__()
         self.head_size = head_size
         self.key = nn.Linear(N_EMBED, head_size, bias=False)
@@ -53,7 +53,7 @@ class Head(nn.Module):
         self.value = nn.Linear(N_EMBED, head_size, bias=False)
         self.register_buffer(
             "tril",
-            torch.tril(torch.ones(block_size, block_size)),
+            torch.tril(torch.ones(max_block_size, max_block_size)),
         )
 
     def forward(self, x: torch.Tensor):
@@ -78,6 +78,7 @@ class BigramLanguageModel(torch.nn.Module):
         self.token_embedding_table = nn.Embedding(vocab_size, N_EMBED)
         self.position_embedding_table = nn.Embedding(BLOCK_SIZE, N_EMBED)
         self.lm_head = nn.Linear(N_EMBED, vocab_size)
+        self.sa_head = Head(N_EMBED)
 
     def forward(
         self,
@@ -92,6 +93,7 @@ class BigramLanguageModel(torch.nn.Module):
             torch.arange(T, device=DEVICE)
         )  # (T, C)
         x = token_embeddings + position_embeddings  # (B, T, C)
+        x = self.sa_head(x) # (B, T, C)
 
         # get the logits
         logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
@@ -111,8 +113,11 @@ class BigramLanguageModel(torch.nn.Module):
         """Generate a sequence of tokens from a starting token."""
         with torch.no_grad():
             for _ in range(max_new_tokens):
+                # crop to block size
+                idx_cond = idx[:, -BLOCK_SIZE:]  # (B, T)
+
                 # get the predictions
-                logits, _ = self.forward(idx)
+                logits, _ = self.forward(idx_cond)
 
                 # get the last prediction
                 logits = logits[:, -1, :]  # (B, C)
