@@ -62,45 +62,54 @@ class Head(nn.Module):
         B, T, C = x.shape
         k = self.key(x)
         q = self.query(x)
-        
+
         # (B, T, C) @ (B, C, T) -> (B, T, T)
-        w = q @ k.transpose(-2, -1) / self.head_size ** 0.5 
+        w = q @ k.transpose(-2, -1) / self.head_size**0.5
 
         w = w.masked_fill(self.tril[:T, :T] == 0, float("-inf"))
-        w = F.softmax(w, dim=-1) # (B, T, T)
+        w = F.softmax(w, dim=-1)  # (B, T, T)
 
-        v = self.value(x) # (B, T, C)
-        out = w @ v # (B, T, T) @ (B, T, C) -> (B, T, C)
+        v = self.value(x)  # (B, T, C)
+        out = w @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
         return out
 
 
 class FeedForward(nn.Module):
-    """ simple linear layer with relu activation, using nn.Sequential"""
+    """simple linear layer with relu activation, using nn.Sequential"""
+
     def __init__(self, n_embed: int):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(n_embed, n_embed),
             nn.ReLU(),
+            nn.Linear(n_embed, n_embed),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
 
 
-
 class MultiHead(nn.Module):
-    """ A multi-head attention layer. """
+    """A multi-head attention layer."""
+
     def __init__(self, n_heads: int, head_size: int):
         super().__init__()
+        n_embed = n_heads * head_size
         self.heads = nn.ModuleList([Head(head_size) for _ in range(n_heads)])
+        self.proj = nn.Linear(n_embed, n_embed)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # return concat of all heads
-        return torch.cat([h(x) for h in self.heads], dim=-1)
+        out = torch.cat([h(x) for h in self.heads], dim=-1)
+        out = self.proj(out)
+        return out
 
 
 class Block(nn.Module):
-    """ Transformer block: communication followed by computation """
+    """Transformer block.
+
+    communication followed by computation + residual connection.
+    """
 
     def __init__(self, n_embd: int, n_head: int):
         super().__init__()
@@ -109,8 +118,8 @@ class Block(nn.Module):
         self.ff = FeedForward(n_embd)
 
     def forward(self, x):
-        x = self.sa(x)
-        x = self.ff(x)
+        x = x + self.sa(x)
+        x = x + self.ff(x)
         return x
 
 
@@ -120,8 +129,7 @@ class Transformer(torch.nn.Module):
         self.token_embedding_table = nn.Embedding(vocab_size, N_EMBED)
         self.position_embedding_table = nn.Embedding(BLOCK_SIZE, N_EMBED)
         self.lm_head = nn.Linear(N_EMBED, vocab_size)
-        self.sa_heads = MultiHead(n_heads=4, head_size=N_EMBED // 4)
-        self.ff = FeedForward(N_EMBED)
+        self.blocks = nn.Sequential(*[Block(N_EMBED, 4) for _ in range(3)])
 
     def forward(
         self,
@@ -136,10 +144,10 @@ class Transformer(torch.nn.Module):
             torch.arange(T, device=DEVICE)
         )  # (T, C)
         x = token_embeddings + position_embeddings  # (B, T, C)
-        x = self.sa_heads(x) # (B, T, C)
+        x = self.blocks(x)  # (B, T, C)
 
         # feed forward
-        x = self.ff(x) # (B, T, C)
+        x = self.ff(x)  # (B, T, C)
 
         # get the logits
         logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
