@@ -3,14 +3,16 @@ from torch import nn
 from torch.nn import functional as F
 
 # hyperparameters
-BLOCK_SIZE = 8
-BATCH_SIZE = 4
+BATCH_SIZE = 64
+BLOCK_SIZE = 256
 MAX_ITERS = 5000
 LEARNING_RATE = 1e-3
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EVAL_INTERVAL = 300
 EVAL_ITERS = 200
 N_EMBED = 32
+
+print(DEVICE)
 
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
@@ -72,6 +74,20 @@ class Head(nn.Module):
         return out
 
 
+class FeedForward(nn.Module):
+    """ simple linear layer with relu activation, using nn.Sequential"""
+    def __init__(self, n_embed: int):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embed, n_embed),
+            nn.ReLU(),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x)
+
+
+
 class MultiHead(nn.Module):
     """ A multi-head attention layer. """
     def __init__(self, n_heads: int, head_size: int):
@@ -90,6 +106,7 @@ class BigramLanguageModel(torch.nn.Module):
         self.position_embedding_table = nn.Embedding(BLOCK_SIZE, N_EMBED)
         self.lm_head = nn.Linear(N_EMBED, vocab_size)
         self.sa_heads = MultiHead(n_heads=4, head_size=N_EMBED // 4)
+        self.ff = FeedForward(N_EMBED)
 
     def forward(
         self,
@@ -105,6 +122,9 @@ class BigramLanguageModel(torch.nn.Module):
         )  # (T, C)
         x = token_embeddings + position_embeddings  # (B, T, C)
         x = self.sa_heads(x) # (B, T, C)
+
+        # feed forward
+        x = self.ff(x) # (B, T, C)
 
         # get the logits
         logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
@@ -189,7 +209,7 @@ def main():
         logits, loss = model(xb, yb)
 
         # backprop
-        optimizer.zero_grad()
+        optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
 
