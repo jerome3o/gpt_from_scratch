@@ -48,6 +48,7 @@ class BigramLanguageModel(torch.nn.Module):
     def __init__(self, vocab_size: int):
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, N_EMBED)
+        self.position_embedding_table = nn.Embedding(BLOCK_SIZE, N_EMBED)
         self.lm_head = nn.Linear(N_EMBED, vocab_size)
 
     def forward(
@@ -55,9 +56,13 @@ class BigramLanguageModel(torch.nn.Module):
         idx: torch.Tensor,
         targets: torch.Tensor = None,
     ) -> torch.Tensor:
+        B, T = idx.shape
 
         # idx and targets are both (B, T) tensors of integers
         token_embeddings = self.token_embedding_table(idx)  # (B, T, C)
+        position_embeddings = self.position_embedding_table(
+            torch.arange(T, device=DEVICE)
+        )
 
         # get the logits
         logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
