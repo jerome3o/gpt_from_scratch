@@ -11,6 +11,9 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EVAL_INTERVAL = 300
 EVAL_ITERS = 200
 N_EMBED = 32
+N_HEAD = 4
+N_LAYERS = 3
+DROP_RATE = 0.1
 
 print(DEVICE)
 
@@ -57,6 +60,7 @@ class Head(nn.Module):
             "tril",
             torch.tril(torch.ones(max_block_size, max_block_size)),
         )
+        self.dropout = nn.Dropout(DROP_RATE)
 
     def forward(self, x: torch.Tensor):
         B, T, C = x.shape
@@ -68,6 +72,7 @@ class Head(nn.Module):
 
         w = w.masked_fill(self.tril[:T, :T] == 0, float("-inf"))
         w = F.softmax(w, dim=-1)  # (B, T, T)
+        w = self.dropout(w)
 
         v = self.value(x)  # (B, T, C)
         out = w @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
@@ -83,6 +88,7 @@ class FeedForward(nn.Module):
             nn.Linear(n_embed, 4 * n_embed),
             nn.ReLU(),
             nn.Linear(4 * n_embed, n_embed),
+            nn.Dropout(DROP_RATE),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -97,11 +103,13 @@ class MultiHead(nn.Module):
         n_embed = n_heads * head_size
         self.heads = nn.ModuleList([Head(head_size) for _ in range(n_heads)])
         self.proj = nn.Linear(n_embed, n_embed)
+        self.dropout = nn.Dropout(DROP_RATE)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # return concat of all heads
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.proj(out)
+        out = self.dropout(out)
         return out
 
 
@@ -116,10 +124,12 @@ class Block(nn.Module):
         head_size = n_embd // n_head
         self.sa_heads = MultiHead(n_head, head_size)
         self.ff = FeedForward(n_embd)
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
 
     def forward(self, x):
-        x = x + self.sa(x)
-        x = x + self.ff(x)
+        x = x + self.sa_heads(self.ln1(x))
+        x = x + self.ff(self.ln2(x))
         return x
 
 
@@ -128,8 +138,9 @@ class Transformer(torch.nn.Module):
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, N_EMBED)
         self.position_embedding_table = nn.Embedding(BLOCK_SIZE, N_EMBED)
+        self.blocks = nn.Sequential(*[Block(N_EMBED, N_HEAD) for _ in range(N_LAYERS)])
+        self.ln_f = nn.LayerNorm(N_EMBED)
         self.lm_head = nn.Linear(N_EMBED, vocab_size)
-        self.blocks = nn.Sequential(*[Block(N_EMBED, 4) for _ in range(3)])
 
     def forward(
         self,
@@ -145,9 +156,7 @@ class Transformer(torch.nn.Module):
         )  # (T, C)
         x = token_embeddings + position_embeddings  # (B, T, C)
         x = self.blocks(x)  # (B, T, C)
-
-        # feed forward
-        x = self.ff(x)  # (B, T, C)
+        x = self.ln_f(x)
 
         # get the logits
         logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
