@@ -99,7 +99,7 @@ class MultiHead(nn.Module):
         return torch.cat([h(x) for h in self.heads], dim=-1)
 
 
-class BigramLanguageModel(torch.nn.Module):
+class Transformer(torch.nn.Module):
     def __init__(self, vocab_size: int):
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, N_EMBED)
@@ -197,7 +197,7 @@ def main():
     train_data = data[:_n]
     val_data = data[_n:]
 
-    model = BigramLanguageModel(vocab_size).to(DEVICE)
+    model = Transformer(vocab_size).to(DEVICE)
 
     # create a pytorch optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
