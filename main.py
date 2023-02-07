@@ -17,6 +17,7 @@ DROP_RATE = 0.2
 
 print(DEVICE)
 
+torch.manual_seed(1337)
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
     ix = torch.randint(len(data) - BLOCK_SIZE, (BATCH_SIZE,))
@@ -199,7 +200,6 @@ class Transformer(torch.nn.Module):
 
 def main():
     raw_training_data = load_training()
-    torch.manual_seed(1337)
 
     # TODO(j.swannack): Look into other encoding schemes
     # i.e.
