@@ -4,7 +4,7 @@ from torch.nn import functional as F
 import sys
 
 _C = 0
-_C_TARGET = -1
+_C_TARGET = 54
 
 # hyperparameters
 BATCH_SIZE = 64
@@ -20,15 +20,8 @@ N_HEAD = 6
 N_LAYERS = 6
 DROP_RATE = 0.2
 
-# print(DEVICE)
+print(DEVICE)
 torch.manual_seed(1337)
-
-def _debug_out(out):
-    global _C
-    print(_C, out.sum().item())
-    if _C == _C_TARGET:
-        ipdb.set_trace()
-    _C = _C + 1
 
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
@@ -66,7 +59,6 @@ class Head(nn.Module):
     def __init__(self, head_size, max_block_size=BLOCK_SIZE):
         super().__init__()
         self.head_size = head_size
-        # print(f"Head, n_embd: {N_EMBED}, head_size: {self.head_size}, block_size: {max_block_size}")
         self.key = nn.Linear(N_EMBED, head_size, bias=False)
         self.query = nn.Linear(N_EMBED, head_size, bias=False)
         self.value = nn.Linear(N_EMBED, head_size, bias=False)
@@ -90,7 +82,6 @@ class Head(nn.Module):
 
         v = self.value(x)  # (B, T, C)
         out = w @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
-        _debug_out(out)
         return out
 
 
@@ -108,7 +99,6 @@ class FeedForward(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.net(x)
-        _debug_out(out)
         return out
 
 
@@ -122,14 +112,11 @@ class MultiHead(nn.Module):
         self.proj = nn.Linear(n_embed, n_embed)
         self.dropout = nn.Dropout(DROP_RATE)
 
-        # print(f"MultiHead, n_embd: {n_embed}, num_heads: {n_heads}, head_size: {head_size}")
-
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # return concat of all heads
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.proj(out)
         out = self.dropout(out)
-        _debug_out(out)
         return out
 
 
@@ -146,12 +133,10 @@ class Block(nn.Module):
         self.ff = FeedForward(n_embd)
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
-        # print(f"Block, n_embd: {n_embd}, n_head: {n_head}, head_size: {head_size}")
 
     def forward(self, x):
         x = x + self.sa_heads(self.ln1(x))
         x = x + self.ff(self.ln2(x))
-        _debug_out(x)
         return x
 
 
@@ -192,7 +177,7 @@ class Transformer(torch.nn.Module):
         x = self.ln_f(x)
 
         # get the logits
-        logits = self.lm_head(token_embeddings)  # (B, T, vocab_size)
+        logits = self.lm_head(x)  # (B, T, vocab_size)
 
         if targets is None:
             loss = None
@@ -203,7 +188,6 @@ class Transformer(torch.nn.Module):
             targets = targets.view(B * T)  # (B*T,)
             loss = F.cross_entropy(logits, targets)
 
-        _debug_out(logits)
         return logits, loss
 
     def generate(self, idx: torch.Tensor, max_new_tokens: int) -> torch.Tensor:
@@ -242,7 +226,6 @@ def main():
     # Character level tokeniser
     chars = sorted(set(raw_training_data))
     vocab_size = len(chars)
-    # print("vocab_size: ", vocab_size)
 
     # create mapping from string to int and vice versa
     s_to_i = {s: i for i, s in enumerate(chars)}
@@ -263,20 +246,18 @@ def main():
     train_data = data[:_n]
     val_data = data[_n:]
 
-    # print(train_data.shape, val_data.shape)
 
     model = Transformer(vocab_size).to(DEVICE)
 
-    # print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
 
     # create a pytorch optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
 
     for iter in range(MAX_ITERS):
-        # # get accurate loss prediction
-        # if iter % EVAL_INTERVAL == 0:
-        #     losses = estimate_loss(model, train_data, val_data)
-        #     print(f"iter: {iter} train {losses['train']:.3f} val {losses['val']:.3f}")
+        # get accurate loss prediction
+        if iter % EVAL_INTERVAL == 0:
+            losses = estimate_loss(model, train_data, val_data)
+            print(f"iter: {iter} train {losses['train']:.3f} val {losses['val']:.3f}")
 
         # get the data
         xb, yb = get_batch(train_data)
@@ -292,7 +273,7 @@ def main():
 
     # generate from the model
     context = torch.zeros((1, 1), dtype=torch.long).to(DEVICE)
-    # print(decode(model.generate(context, 1000).cpu().numpy()[0]))
+    print(decode(model.generate(context, 1000).cpu().numpy()[0]))
 
 
 if __name__ == "__main__":
