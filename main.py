@@ -241,6 +241,11 @@ def main():
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
 
     for iter in range(MAX_ITERS):
+        # get accurate loss prediction
+        if iter % EVAL_INTERVAL == 0:
+            losses = estimate_loss(model, train_data, val_data)
+            print(f"iter: {iter} train {losses['train']:.3f} val {losses['val']:.3f}")
+
         # get the data
         xb, yb = get_batch(train_data)
 
@@ -252,10 +257,6 @@ def main():
         loss.backward()
         optimizer.step()
 
-        # get accurate loss prediction
-        if iter % EVAL_INTERVAL == 0:
-            losses = estimate_loss(model, train_data, val_data)
-            print(f"iter: {iter} train {losses['train']:.3f} val {losses['val']:.3f}")
 
     # generate from the model
     context = torch.zeros((1, 1), dtype=torch.long).to(DEVICE)
