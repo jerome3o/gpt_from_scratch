@@ -17,6 +17,12 @@ Go to the [pytorch site](https://pytorch.org/) and select the pip version applic
 pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/rocm5.2
 ```
 
+For CPU only:
+
+```sh
+pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
 Install other dependencies:
 
 ```

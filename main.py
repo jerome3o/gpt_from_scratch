@@ -6,9 +6,9 @@ from torch.nn import functional as F
 BATCH_SIZE = 64
 BLOCK_SIZE = 256
 MAX_ITERS = 5000
+EVAL_INTERVAL = 500
 LEARNING_RATE = 3e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EVAL_INTERVAL = 300
 EVAL_ITERS = 200
 N_EMBED = 384
 N_HEAD = 6
@@ -16,8 +16,8 @@ N_LAYERS = 6
 DROP_RATE = 0.2
 
 print(DEVICE)
-
 torch.manual_seed(1337)
+
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
     ix = torch.randint(len(data) - BLOCK_SIZE, (BATCH_SIZE,))
@@ -209,6 +209,7 @@ def main():
     # Character level tokeniser
     chars = sorted(set(raw_training_data))
     vocab_size = len(chars)
+    print("vocab_size: ", vocab_size)
 
     # create mapping from string to int and vice versa
     s_to_i = {s: i for i, s in enumerate(chars)}
@@ -229,10 +230,16 @@ def main():
     train_data = data[:_n]
     val_data = data[_n:]
 
+    print(train_data.shape, val_data.shape)
+
     model = Transformer(vocab_size).to(DEVICE)
+
+    print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
 
     # create a pytorch optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+
+    return
 
     for iter in range(MAX_ITERS):
         # get the data
