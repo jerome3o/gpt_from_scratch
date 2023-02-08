@@ -5,7 +5,8 @@ from torch.nn import functional as F
 # hyperparameters
 BATCH_SIZE = 64
 BLOCK_SIZE = 256
-MAX_ITERS = 5000
+# MAX_ITERS = 5000
+MAX_ITERS = 2
 EVAL_INTERVAL = 500
 LEARNING_RATE = 3e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -238,8 +239,6 @@ def main():
 
     # create a pytorch optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
-
-    return
 
     for iter in range(MAX_ITERS):
         # get the data
