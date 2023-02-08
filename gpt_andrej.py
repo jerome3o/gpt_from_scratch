@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+import sys
 
 # hyperparameters
 batch_size = 64  # how many independent sequences will we process in parallel?
@@ -88,8 +89,8 @@ class Head(nn.Module):
         q = self.query(x)  # (B,T,C)
 
         # compute attention scores ("affinities")
-        wei = q @ k.transpose(-2, -1) * k.shape[-1] ** -0.5  # (B, T, C) @ (B, C, T) -> (B, T, T)
-        print("w sum: ", wei.sum())
+        wei = q @ k.transpose(-2, -1) * k.shape[-1] ** -0.5
+
         wei = wei.masked_fill(self.tril[:T, :T] == 0, float("-inf"))  # (B, T, T)
         wei = F.softmax(wei, dim=-1)  # (B, T, T)
         wei = self.dropout(wei)

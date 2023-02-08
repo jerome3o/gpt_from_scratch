@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
+import sys
 
 # hyperparameters
 BATCH_SIZE = 64
@@ -55,7 +56,7 @@ class Head(nn.Module):
     def __init__(self, head_size, max_block_size=BLOCK_SIZE):
         super().__init__()
         self.head_size = head_size
-        print(f"Head, n_embd: {N_EMBED}, head_size: {self.head_size}")
+        print(f"Head, n_embd: {N_EMBED}, head_size: {self.head_size}, block_size: {max_block_size}")
         self.key = nn.Linear(N_EMBED, head_size, bias=False)
         self.query = nn.Linear(N_EMBED, head_size, bias=False)
         self.value = nn.Linear(N_EMBED, head_size, bias=False)
@@ -72,6 +73,9 @@ class Head(nn.Module):
 
         # (B, T, C) @ (B, C, T) -> (B, T, T)
         w = q @ k.transpose(-2, -1) / self.head_size**0.5
+        print("w sum: ", w.sum())
+        sys.exit(0)
+
 
         w = w.masked_fill(self.tril[:T, :T] == 0, float("-inf"))
         w = F.softmax(w, dim=-1)  # (B, T, T)
