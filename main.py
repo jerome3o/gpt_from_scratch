@@ -23,6 +23,13 @@ DROP_RATE = 0.2
 # print(DEVICE)
 torch.manual_seed(1337)
 
+def _debug_out(out):
+    global _C
+    print(_C, out.sum().item())
+    if _C == _C_TARGET:
+        ipdb.set_trace()
+    _C = _C + 1
+
 
 def get_batch(data: torch.Tensor) -> torch.Tensor:
     ix = torch.randint(len(data) - BLOCK_SIZE, (BATCH_SIZE,))
@@ -83,10 +90,7 @@ class Head(nn.Module):
 
         v = self.value(x)  # (B, T, C)
         out = w @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(out)
         return out
 
 
@@ -104,10 +108,7 @@ class FeedForward(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.net(x)
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(out)
         return out
 
 
@@ -128,10 +129,7 @@ class MultiHead(nn.Module):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.proj(out)
         out = self.dropout(out)
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(out)
         return out
 
 
@@ -153,11 +151,7 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.sa_heads(self.ln1(x))
         x = x + self.ff(self.ln2(x))
-        out = x
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(x)
         return x
 
 
@@ -209,11 +203,7 @@ class Transformer(torch.nn.Module):
             targets = targets.view(B * T)  # (B*T,)
             loss = F.cross_entropy(logits, targets)
 
-        out = logits
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(logits)
         return logits, loss
 
     def generate(self, idx: torch.Tensor, max_new_tokens: int) -> torch.Tensor:

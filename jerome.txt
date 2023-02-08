@@ -1,53 +1,55 @@
-cuda
-vocab_size:  65
-torch.Size([1003854]) torch.Size([111540])
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-MultiHead, n_embd: 384, num_heads: 6, head_size: 64
-Block, n_embd: 384, n_head: 6, head_size: 64
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-MultiHead, n_embd: 384, num_heads: 6, head_size: 64
-Block, n_embd: 384, n_head: 6, head_size: 64
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-MultiHead, n_embd: 384, num_heads: 6, head_size: 64
-Block, n_embd: 384, n_head: 6, head_size: 64
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-MultiHead, n_embd: 384, num_heads: 6, head_size: 64
-Block, n_embd: 384, n_head: 6, head_size: 64
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-MultiHead, n_embd: 384, num_heads: 6, head_size: 64
-Block, n_embd: 384, n_head: 6, head_size: 64
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-Head, n_embd: 384, head_size: 64, block_size: 256
-MultiHead, n_embd: 384, num_heads: 6, head_size: 64
-Block, n_embd: 384, n_head: 6, head_size: 64
-10.788929 M parameters
 0 538.0425415039062
+1 -3881.4375
+2 9856.9609375
+3 -3946.8203125
+4 -16966.693359375
+5 -3663.811767578125
+6 -486.9243469238281
+7 15600.4384765625
+8 15271.9453125
+9 36717.96875
+10 -53973.8046875
+11 -19099.1328125
+12 41918.2421875
+13 -36834.8125
+14 -24723.3671875
+15 44161.4765625
+16 -93379.4296875
+17 -33946.00390625
+18 60807.7265625
+19 8269.181640625
+20 -49934.4375
+21 1256.4307861328125
+22 7277.62109375
+23 9495.3779296875
+24 -326.6839294433594
+25 45042.7734375
+26 10770.087890625
+27 -2381.61572265625
+28 -40138.54296875
+29 -18472.640625
+30 5323.08837890625
+31 -44558.7734375
+32 -43496.53125
+33 59240.3515625
+34 -42470.2890625
+35 27540.1484375
+36 23880.294921875
+37 46149.3671875
+38 51478.1640625
+39 32789.5859375
+40 -10010.806640625
+41 -122433.640625
+42 55447.7421875
+43 98469.8828125
+44 181457.78125
+45 6517.3173828125
+46 8514.0859375
+47 21757.9609375
+48 37200.171875
+49 -38707.83984375
+50 -23523.2265625
+51 -3304.55517578125
+52 66149.5234375
+53 244302.734375
+54 464.3521423339844

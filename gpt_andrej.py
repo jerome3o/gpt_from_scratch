@@ -21,6 +21,14 @@ n_layer = 6
 dropout = 0.2
 # ------------
 
+def _debug_out(out):
+    global _C
+    print(_C, out.sum().item())
+    if _C == _C_TARGET:
+        ipdb.set_trace()
+    _C = _C + 1
+
+
 torch.manual_seed(1337)
 
 # wget https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
@@ -99,10 +107,7 @@ class Head(nn.Module):
         # perform the weighted aggregation of the values
         v = self.value(x)  # (B,T,C)
         out = wei @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(out)
         return out
 
 
@@ -121,10 +126,7 @@ class FeedFoward(nn.Module):
 
     def forward(self, x):
         out = self.net(x)
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(out)
         return out
 
 
@@ -142,10 +144,7 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.dropout(self.proj(out))
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(out)
         return out
 
 
@@ -166,11 +165,7 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.sa(self.ln1(x))
         x = x + self.ffwd(self.ln2(x))
-        out = x
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(x)
         return x
 
 
@@ -218,11 +213,7 @@ class GPTLanguageModel(nn.Module):
             targets = targets.view(B * T)
             loss = F.cross_entropy(logits, targets)
 
-        out = logits
-        print(_C, out.sum().item())
-        if _C == _C_TARGET:
-            ipdb.set_trace()
-        c += 1
+        _debug_out(logits)
         return logits, loss
 
     def generate(self, idx, max_new_tokens):
