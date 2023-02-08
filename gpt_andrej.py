@@ -100,20 +100,6 @@ class Head(nn.Module):
         return out
 
 
-class MultiHeadAttention(nn.Module):
-    """multiple heads of self-attention in parallel"""
-
-    def __init__(self, num_heads, head_size):
-        super().__init__()
-        self.heads = nn.ModuleList([Head(head_size) for _ in range(num_heads)])
-        self.proj = nn.Linear(n_embd, n_embd)
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, x):
-        out = torch.cat([h(x) for h in self.heads], dim=-1)
-        out = self.dropout(self.proj(out))
-        return out
-
 
 class FeedFoward(nn.Module):
     """a simple linear layer followed by a non-linearity"""
@@ -129,6 +115,21 @@ class FeedFoward(nn.Module):
 
     def forward(self, x):
         return self.net(x)
+
+
+class MultiHeadAttention(nn.Module):
+    """multiple heads of self-attention in parallel"""
+
+    def __init__(self, num_heads, head_size):
+        super().__init__()
+        self.heads = nn.ModuleList([Head(head_size) for _ in range(num_heads)])
+        self.proj = nn.Linear(n_embd, n_embd)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        out = torch.cat([h(x) for h in self.heads], dim=-1)
+        out = self.dropout(self.proj(out))
+        return out
 
 
 class Block(nn.Module):

@@ -73,9 +73,6 @@ class Head(nn.Module):
 
         # (B, T, C) @ (B, C, T) -> (B, T, T)
         w = q @ k.transpose(-2, -1) / self.head_size**0.5
-        print("w sum: ", w.sum())
-        sys.exit(0)
-
 
         w = w.masked_fill(self.tril[:T, :T] == 0, float("-inf"))
         w = F.softmax(w, dim=-1)  # (B, T, T)
@@ -99,7 +96,10 @@ class FeedForward(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+        out = self.net(x)
+        print(sum(out))
+        sys.exit(0)
+        return out
 
 
 class MultiHead(nn.Module):
