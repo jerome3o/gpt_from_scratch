@@ -3,11 +3,14 @@ import torch.nn as nn
 from torch.nn import functional as F
 import sys
 
+_C = 0
+_C_TARGET = -1
+
 # hyperparameters
 batch_size = 64  # how many independent sequences will we process in parallel?
 block_size = 256  # what is the maximum context length for predictions?
 # max_iters = 5000
-max_iters = 2
+max_iters = 1
 eval_interval = 500
 learning_rate = 3e-4
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -96,7 +99,10 @@ class Head(nn.Module):
         # perform the weighted aggregation of the values
         v = self.value(x)  # (B,T,C)
         out = wei @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
-        import ipdb; ipdb.set_trace()
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return out
 
 
@@ -115,7 +121,10 @@ class FeedFoward(nn.Module):
 
     def forward(self, x):
         out = self.net(x)
-        import ipdb; ipdb.set_trace()
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return out
 
 
@@ -133,7 +142,10 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.dropout(self.proj(out))
-        import ipdb; ipdb.set_trace()
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return out
 
 
@@ -154,7 +166,11 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.sa(self.ln1(x))
         x = x + self.ffwd(self.ln2(x))
-        import ipdb; ipdb.set_trace()
+        out = x
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return x
 
 
@@ -201,8 +217,12 @@ class GPTLanguageModel(nn.Module):
             logits = logits.view(B * T, C)
             targets = targets.view(B * T)
             loss = F.cross_entropy(logits, targets)
-        import ipdb; ipdb.set_trace()
 
+        out = logits
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return logits, loss
 
     def generate(self, idx, max_new_tokens):
@@ -240,7 +260,6 @@ for iter in range(max_iters):
 
     # sample a batch of data
     xb, yb = get_batch("train")
-    import ipdb; ipdb.set_trace()
 
     # evaluate the loss
     logits, loss = model(xb, yb)

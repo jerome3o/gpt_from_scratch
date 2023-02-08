@@ -1,0 +1,53 @@
+cuda
+vocab_size:  65
+torch.Size([1003854]) torch.Size([111540])
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+MultiHead, n_embd: 384, num_heads: 6, head_size: 64
+Block, n_embd: 384, n_head: 6, head_size: 64
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+MultiHead, n_embd: 384, num_heads: 6, head_size: 64
+Block, n_embd: 384, n_head: 6, head_size: 64
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+MultiHead, n_embd: 384, num_heads: 6, head_size: 64
+Block, n_embd: 384, n_head: 6, head_size: 64
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+MultiHead, n_embd: 384, num_heads: 6, head_size: 64
+Block, n_embd: 384, n_head: 6, head_size: 64
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+MultiHead, n_embd: 384, num_heads: 6, head_size: 64
+Block, n_embd: 384, n_head: 6, head_size: 64
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+Head, n_embd: 384, head_size: 64, block_size: 256
+MultiHead, n_embd: 384, num_heads: 6, head_size: 64
+Block, n_embd: 384, n_head: 6, head_size: 64
+10.788929 M parameters
+0 538.0425415039062

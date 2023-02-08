@@ -3,11 +3,14 @@ from torch import nn
 from torch.nn import functional as F
 import sys
 
+_C = 0
+_C_TARGET = -1
+
 # hyperparameters
 BATCH_SIZE = 64
 BLOCK_SIZE = 256
 # MAX_ITERS = 5000
-MAX_ITERS = 2
+MAX_ITERS = 1
 EVAL_INTERVAL = 500
 LEARNING_RATE = 3e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -80,7 +83,10 @@ class Head(nn.Module):
 
         v = self.value(x)  # (B, T, C)
         out = w @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
-        import ipdb; ipdb.set_trace()
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return out
 
 
@@ -98,7 +104,10 @@ class FeedForward(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out = self.net(x)
-        import ipdb; ipdb.set_trace()
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return out
 
 
@@ -119,7 +128,10 @@ class MultiHead(nn.Module):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.proj(out)
         out = self.dropout(out)
-        import ipdb; ipdb.set_trace()
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return out
 
 
@@ -141,7 +153,11 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.sa_heads(self.ln1(x))
         x = x + self.ff(self.ln2(x))
-        import ipdb; ipdb.set_trace()
+        out = x
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return x
 
 
@@ -192,8 +208,12 @@ class Transformer(torch.nn.Module):
             logits = logits.view(B * T, C)  # (B*T, C)
             targets = targets.view(B * T)  # (B*T,)
             loss = F.cross_entropy(logits, targets)
-        import ipdb; ipdb.set_trace()
 
+        out = logits
+        print(_C, out.sum().item())
+        if _C == _C_TARGET:
+            ipdb.set_trace()
+        c += 1
         return logits, loss
 
     def generate(self, idx: torch.Tensor, max_new_tokens: int) -> torch.Tensor:
@@ -270,7 +290,6 @@ def main():
 
         # get the data
         xb, yb = get_batch(train_data)
-        import ipdb; ipdb.set_trace()
 
         # get the predictions
         logits, loss = model(xb, yb)
@@ -291,6 +310,4 @@ if __name__ == "__main__":
     import ipdb
 
     logging.basicConfig(level=logging.INFO)
-
-    with ipdb.launch_ipdb_on_exception():
-        main()
+    main()
