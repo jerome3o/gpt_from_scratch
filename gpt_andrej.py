@@ -74,7 +74,6 @@ def estimate_loss():
 class Head(nn.Module):
     def __init__(self, head_size):
         super().__init__()
-        print(f"Head, n_embd: {n_embd}, head_size: {head_size}")
         print(f"Head, n_embd: {n_embd}, head_size: {head_size}, block_size: {block_size}")
         self.key = nn.Linear(n_embd, head_size, bias=False)
         self.query = nn.Linear(n_embd, head_size, bias=False)
@@ -126,6 +125,8 @@ class MultiHeadAttention(nn.Module):
         self.proj = nn.Linear(n_embd, n_embd)
         self.dropout = nn.Dropout(dropout)
 
+        print(f"MultiHeadAttention, n_embd: {n_embd}, num_heads: {num_heads}, head_size: {head_size}")
+
     def forward(self, x):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.dropout(self.proj(out))
@@ -143,6 +144,8 @@ class Block(nn.Module):
         self.ffwd = FeedFoward(n_embd)
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
+
+        print(f"Block, n_embd: {n_embd}, n_head: {n_head}, head_size: {head_size}")
 
     def forward(self, x):
         x = x + self.sa(self.ln1(x))

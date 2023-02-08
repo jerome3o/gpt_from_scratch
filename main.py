@@ -96,10 +96,7 @@ class FeedForward(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out = self.net(x)
-        print(sum(out))
-        sys.exit(0)
-        return out
+        return self.net(x)
 
 
 class MultiHead(nn.Module):
@@ -111,6 +108,8 @@ class MultiHead(nn.Module):
         self.heads = nn.ModuleList([Head(head_size) for _ in range(n_heads)])
         self.proj = nn.Linear(n_embed, n_embed)
         self.dropout = nn.Dropout(DROP_RATE)
+
+        print(f"MultiHead, n_embd: {n_embed}, num_heads: {n_heads}, head_size: {head_size}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # return concat of all heads
@@ -133,6 +132,7 @@ class Block(nn.Module):
         self.ff = FeedForward(n_embd)
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
+        print(f"Block, n_embd: {n_embd}, n_head: {n_head}, head_size: {head_size}")
 
     def forward(self, x):
         x = x + self.sa_heads(self.ln1(x))
