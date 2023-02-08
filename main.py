@@ -80,6 +80,7 @@ class Head(nn.Module):
 
         v = self.value(x)  # (B, T, C)
         out = w @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
+        import ipdb; ipdb.set_trace()
         return out
 
 
@@ -96,7 +97,9 @@ class FeedForward(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+        out = self.net(x)
+        import ipdb; ipdb.set_trace()
+        return out
 
 
 class MultiHead(nn.Module):
@@ -116,6 +119,7 @@ class MultiHead(nn.Module):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.proj(out)
         out = self.dropout(out)
+        import ipdb; ipdb.set_trace()
         return out
 
 
@@ -137,6 +141,7 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.sa_heads(self.ln1(x))
         x = x + self.ff(self.ln2(x))
+        import ipdb; ipdb.set_trace()
         return x
 
 
@@ -187,6 +192,7 @@ class Transformer(torch.nn.Module):
             logits = logits.view(B * T, C)  # (B*T, C)
             targets = targets.view(B * T)  # (B*T,)
             loss = F.cross_entropy(logits, targets)
+        import ipdb; ipdb.set_trace()
 
         return logits, loss
 
@@ -257,13 +263,14 @@ def main():
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
 
     for iter in range(MAX_ITERS):
-        # get accurate loss prediction
-        if iter % EVAL_INTERVAL == 0:
-            losses = estimate_loss(model, train_data, val_data)
-            print(f"iter: {iter} train {losses['train']:.3f} val {losses['val']:.3f}")
+        # # get accurate loss prediction
+        # if iter % EVAL_INTERVAL == 0:
+        #     losses = estimate_loss(model, train_data, val_data)
+        #     print(f"iter: {iter} train {losses['train']:.3f} val {losses['val']:.3f}")
 
         # get the data
         xb, yb = get_batch(train_data)
+        import ipdb; ipdb.set_trace()
 
         # get the predictions
         logits, loss = model(xb, yb)

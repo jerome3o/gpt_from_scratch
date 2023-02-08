@@ -96,6 +96,7 @@ class Head(nn.Module):
         # perform the weighted aggregation of the values
         v = self.value(x)  # (B,T,C)
         out = wei @ v  # (B, T, T) @ (B, T, C) -> (B, T, C)
+        import ipdb; ipdb.set_trace()
         return out
 
 
@@ -113,7 +114,9 @@ class FeedFoward(nn.Module):
         )
 
     def forward(self, x):
-        return self.net(x)
+        out = self.net(x)
+        import ipdb; ipdb.set_trace()
+        return out
 
 
 class MultiHeadAttention(nn.Module):
@@ -130,6 +133,7 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.dropout(self.proj(out))
+        import ipdb; ipdb.set_trace()
         return out
 
 
@@ -150,6 +154,7 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.sa(self.ln1(x))
         x = x + self.ffwd(self.ln2(x))
+        import ipdb; ipdb.set_trace()
         return x
 
 
@@ -196,6 +201,7 @@ class GPTLanguageModel(nn.Module):
             logits = logits.view(B * T, C)
             targets = targets.view(B * T)
             loss = F.cross_entropy(logits, targets)
+        import ipdb; ipdb.set_trace()
 
         return logits, loss
 
@@ -227,13 +233,14 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 for iter in range(max_iters):
 
-    # every once in a while evaluate the loss on train and val sets
-    if iter % eval_interval == 0 or iter == max_iters - 1:
-        losses = estimate_loss()
-        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+    # # every once in a while evaluate the loss on train and val sets
+    # if iter % eval_interval == 0 or iter == max_iters - 1:
+    #     losses = estimate_loss()
+    #     print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
 
     # sample a batch of data
     xb, yb = get_batch("train")
+    import ipdb; ipdb.set_trace()
 
     # evaluate the loss
     logits, loss = model(xb, yb)
