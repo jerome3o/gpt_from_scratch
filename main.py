@@ -20,7 +20,7 @@ N_HEAD = 6
 N_LAYERS = 6
 DROP_RATE = 0.2
 
-print(DEVICE)
+# print(DEVICE)
 torch.manual_seed(1337)
 
 
@@ -59,7 +59,7 @@ class Head(nn.Module):
     def __init__(self, head_size, max_block_size=BLOCK_SIZE):
         super().__init__()
         self.head_size = head_size
-        print(f"Head, n_embd: {N_EMBED}, head_size: {self.head_size}, block_size: {max_block_size}")
+        # print(f"Head, n_embd: {N_EMBED}, head_size: {self.head_size}, block_size: {max_block_size}")
         self.key = nn.Linear(N_EMBED, head_size, bias=False)
         self.query = nn.Linear(N_EMBED, head_size, bias=False)
         self.value = nn.Linear(N_EMBED, head_size, bias=False)
@@ -121,7 +121,7 @@ class MultiHead(nn.Module):
         self.proj = nn.Linear(n_embed, n_embed)
         self.dropout = nn.Dropout(DROP_RATE)
 
-        print(f"MultiHead, n_embd: {n_embed}, num_heads: {n_heads}, head_size: {head_size}")
+        # print(f"MultiHead, n_embd: {n_embed}, num_heads: {n_heads}, head_size: {head_size}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # return concat of all heads
@@ -148,7 +148,7 @@ class Block(nn.Module):
         self.ff = FeedForward(n_embd)
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
-        print(f"Block, n_embd: {n_embd}, n_head: {n_head}, head_size: {head_size}")
+        # print(f"Block, n_embd: {n_embd}, n_head: {n_head}, head_size: {head_size}")
 
     def forward(self, x):
         x = x + self.sa_heads(self.ln1(x))
@@ -252,7 +252,7 @@ def main():
     # Character level tokeniser
     chars = sorted(set(raw_training_data))
     vocab_size = len(chars)
-    print("vocab_size: ", vocab_size)
+    # print("vocab_size: ", vocab_size)
 
     # create mapping from string to int and vice versa
     s_to_i = {s: i for i, s in enumerate(chars)}
@@ -273,11 +273,11 @@ def main():
     train_data = data[:_n]
     val_data = data[_n:]
 
-    print(train_data.shape, val_data.shape)
+    # print(train_data.shape, val_data.shape)
 
     model = Transformer(vocab_size).to(DEVICE)
 
-    print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
+    # print(sum(p.numel() for p in model.parameters())/1e6, 'M parameters')
 
     # create a pytorch optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
@@ -302,7 +302,7 @@ def main():
 
     # generate from the model
     context = torch.zeros((1, 1), dtype=torch.long).to(DEVICE)
-    print(decode(model.generate(context, 1000).cpu().numpy()[0]))
+    # print(decode(model.generate(context, 1000).cpu().numpy()[0]))
 
 
 if __name__ == "__main__":

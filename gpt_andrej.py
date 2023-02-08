@@ -31,7 +31,7 @@ with open("input.txt", "r", encoding="utf-8") as f:
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
 
-print("vocab_size: ", vocab_size)
+# print("vocab_size: ", vocab_size)
 
 # create a mapping from characters to integers
 stoi = {ch: i for i, ch in enumerate(chars)}
@@ -46,7 +46,7 @@ data = torch.tensor(encode(text), dtype=torch.long)
 n = int(0.9 * len(data))  # first 90% will be train, rest val
 train_data = data[:n]
 val_data = data[n:]
-print(train_data.shape, val_data.shape)
+# print(train_data.shape, val_data.shape)
 
 # data loading
 def get_batch(split):
@@ -77,7 +77,7 @@ def estimate_loss():
 class Head(nn.Module):
     def __init__(self, head_size):
         super().__init__()
-        print(f"Head, n_embd: {n_embd}, head_size: {head_size}, block_size: {block_size}")
+        # print(f"Head, n_embd: {n_embd}, head_size: {head_size}, block_size: {block_size}")
         self.key = nn.Linear(n_embd, head_size, bias=False)
         self.query = nn.Linear(n_embd, head_size, bias=False)
         self.value = nn.Linear(n_embd, head_size, bias=False)
@@ -137,7 +137,7 @@ class MultiHeadAttention(nn.Module):
         self.proj = nn.Linear(n_embd, n_embd)
         self.dropout = nn.Dropout(dropout)
 
-        print(f"MultiHeadAttention, n_embd: {n_embd}, num_heads: {num_heads}, head_size: {head_size}")
+        # print(f"MultiHeadAttention, n_embd: {n_embd}, num_heads: {num_heads}, head_size: {head_size}")
 
     def forward(self, x):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
@@ -161,7 +161,7 @@ class Block(nn.Module):
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
 
-        print(f"Block, n_embd: {n_embd}, n_head: {n_head}, head_size: {head_size}")
+        # print(f"Block, n_embd: {n_embd}, n_head: {n_head}, head_size: {head_size}")
 
     def forward(self, x):
         x = x + self.sa(self.ln1(x))
@@ -246,7 +246,7 @@ class GPTLanguageModel(nn.Module):
 model = GPTLanguageModel()
 m = model.to(device)
 # print the number of parameters in the model
-print(sum(p.numel() for p in m.parameters()) / 1e6, "M parameters")
+# print(sum(p.numel() for p in m.parameters()) / 1e6, "M parameters")
 
 # create a PyTorch optimizer
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
@@ -269,5 +269,5 @@ for iter in range(max_iters):
 
 # generate from the model
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
-print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))
+# print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))
 # open('more.txt', 'w').write(decode(m.generate(context, max_new_tokens=10000)[0].tolist()))
