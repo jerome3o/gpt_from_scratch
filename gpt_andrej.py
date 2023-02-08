@@ -71,10 +71,10 @@ def estimate_loss():
 
 
 class Head(nn.Module):
-    """one head of self-attention"""
-
     def __init__(self, head_size):
         super().__init__()
+        print(f"Head, n_embd: {n_embd}, head_size: {head_size}")
+        print(f"Head, n_embd: {n_embd}, head_size: {head_size}, block_size: {block_size}")
         self.key = nn.Linear(n_embd, head_size, bias=False)
         self.query = nn.Linear(n_embd, head_size, bias=False)
         self.value = nn.Linear(n_embd, head_size, bias=False)

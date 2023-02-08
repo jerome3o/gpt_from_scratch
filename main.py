@@ -55,6 +55,7 @@ class Head(nn.Module):
     def __init__(self, head_size, max_block_size=BLOCK_SIZE):
         super().__init__()
         self.head_size = head_size
+        print(f"Head, n_embd: {N_EMBED}, head_size: {self.head_size}")
         self.key = nn.Linear(N_EMBED, head_size, bias=False)
         self.query = nn.Linear(N_EMBED, head_size, bias=False)
         self.value = nn.Linear(N_EMBED, head_size, bias=False)
