@@ -9,12 +9,12 @@ _C_TARGET = 54
 # hyperparameters
 BATCH_SIZE = 64
 BLOCK_SIZE = 256
-# MAX_ITERS = 5000
-MAX_ITERS = 1
+MAX_ITERS = 10000
+# MAX_ITERS = 1
 EVAL_INTERVAL = 500
 LEARNING_RATE = 3e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EVAL_ITERS = 200
+EVAL_ITERS = 10
 N_EMBED = 384
 N_HEAD = 6
 N_LAYERS = 6
@@ -151,7 +151,6 @@ class Transformer(torch.nn.Module):
 
         self.apply(self._init_weights)
 
-
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
@@ -246,9 +245,9 @@ def main():
     train_data = data[:_n]
     val_data = data[_n:]
 
-
     model = Transformer(vocab_size).to(DEVICE)
-
+    # print the number of parameters in the model
+    print(sum(p.numel() for p in model.parameters()) / 1e6, "M parameters")
 
     # create a pytorch optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
@@ -270,10 +269,20 @@ def main():
         loss.backward()
         optimizer.step()
 
-
     # generate from the model
     context = torch.zeros((1, 1), dtype=torch.long).to(DEVICE)
     print(decode(model.generate(context, 1000).cpu().numpy()[0]))
+
+    # Additional information
+
+    torch.save(
+        {
+            "iter": iter,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+        },
+        "model.pt"
+    )
 
 
 if __name__ == "__main__":
